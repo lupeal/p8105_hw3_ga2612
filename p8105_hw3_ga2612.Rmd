@@ -10,13 +10,14 @@ output:
 ```{r setup, include=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(p8105.datasets)
+library(forcats)
 ```
 
 # Problem 1
 
 ```{r}
 #loading dataset
-library(p8105.datasets)
 data("instacart")
 
 instacart <- instacart %>% as_tibble()
@@ -31,10 +32,10 @@ instacart %>%
   arrange(desc(n))
 ```
 
-There are a total of `r instacart %>% pull(aisle) %>% unique() %>% sum()` with fresh vegetables and fresh fruits are ordered most from. Above is a chart summarizing all aisles with the number of products ordered per aisle. 
+There are a total of `r instacart %>% pull(aisle) %>% unique() %>% sum()` with fresh vegetables and fresh fruits are the ones ordered most from. Above is a chart summarizing all aisles with the number of products ordered per aisle. 
 
 
-Below is a plot that shows the number of items ordered per aisle, for aisles with more than 10000 items ordered. 
+Below is a plot that shows the number of items ordered per aisle, for aisles with more than 10000 items ordered. The aisles are displayed in an ascending order, by number of items ordered per aisle. 
 
 ```{r}
 instacart %>%
@@ -64,7 +65,7 @@ instacart %>%
 ```
 
 
-Below is a table that displays the average hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week. 
+Below is a table that displays the average hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week. Based on the table, we can see that Pink Lady Apples tend to be ordered earlier in the day compared to Coffee Ice Cream. Day 5 is the exception, where they were on average ordered in the same hour of that day. 
 
 ```{r, message=FALSE}
 instacart %>%
@@ -77,14 +78,89 @@ instacart %>%
 ```
 
 
+# Problem 2
+
+```{r}
+#loading dataset
+data("brfss_smart2010")
+
+brfss_smart2010 <- brfss_smart2010 %>% as_tibble()
+```
+
+First, do some data cleaning:
+
+format the data to use appropriate variable names;
+focus on the “Overall Health” topic
+
+include only responses from “Excellent” to “Poor”
+organize responses as a factor taking levels ordered from “Poor” to “Excellent”
 
 
+cleaning = we want counties that have ratings from Excellent to Poor
+```{r}
+#data cleaning
+brfss_smart2010 <- janitor::clean_names(brfss_smart2010) %>%
+  rename(location_abrv = locationabbr,
+         location_desc = locationdesc) %>%
+  filter(topic == "Overall Health") %>%
 
-
+```
 
 
 ```{r}
-library(p8105.datasets)
-data("brfss_smart2010")
+brfss_smart2010 %>%
+  filter(!(location_desc %in% c('Excellent', 'Very good', 'Good', 'Fair', 'Poor'))) %>%
+  mutate(response = as.factor(response),
+         response = fct_reorder(response, display_order,
+                                         .desc = TRUE))
 ```
+response = fct_relevel(response, c('Poor', 'Fair', 'Good', 'Very good', 'Excellent')
+
+```{r}
+brfss_smart2010 %>%
+  group_by(location_desc) %>%
+  filter(response == c('Excellent', 'Very good', 'Good', 'Fair', 'Poor')) %>%
+  mutate(response = as.factor(response),
+         response = fct_reorder(response, display_order, .desc = TRUE))
+```
+
+
+
+# Problem 3
+
+```{r, message = FALSE}
+#importing data
+nhanes_demo <- read_csv('data_hw3/nhanes_covar.csv')
+
+nhanes_accel <- read_csv('data_hw3/nhanes_accel.csv')
+```
+
+note: sex (1 = male, 2 = female), edu (1 = less than high school, 2 = high school equiv, 3 = more than high)
+
+```{r}
+#cleaning data
+nhanes_demo <- nhanes_demo[-c(1, 2, 3, 4),] %>%
+  rename(seqn = '...1',
+         sex = '1 = male',
+         age = '...3',
+         bmi = '...4',
+         education = '1 = Less than high school')
+
+nhanes_accel <- janitor::clean_names(nhanes_accel)
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
 
