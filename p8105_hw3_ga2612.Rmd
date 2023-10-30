@@ -206,6 +206,40 @@ nhanes_tidy %>%
 # scale_fill_brewer(palette = 'PuRd') 
 ```
 
+Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each participant. Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level. Include a trend line or a smooth to illustrate differences. Comment on your plot.
+
+
+```{r}
+#first try doesn't work, only picks first number
+nhanes_tidy %>%
+  mutate(total_activity = sum(min1:min1440)) %>%
+  select(seqn, sex, age, bmi, education, total_activity)
+```
+
+
+```{r}
+#checking above, but isn't working. 
+nhanes_tidy %>%
+  filter(seqn == '62161' & sex == 'male' & age == '22' & bmi == '23.3' & education == 'high school equivalent') %>%
+  summarize(total_activity = sum(min1:min1440)) %>%
+  select(seqn, sex, age, bmi, education, total_activity)
+```
+
+
+
+Below are plots for total activities across age for men and women in different education levels. From the plots we can see that for those with high school equivalent education total activity tended to decline for both male and females as age increased. For those with more than high school education, total activity tended to be higher for younger males than older males; for females there was higher total activity for middle-aged women. 
+
+```{r,message=FALSE}
+#finally? might work, but feeling iffy on total activity observations. 
+nhanes_tidy %>%
+  group_by(seqn, sex, age, bmi, education) %>%
+  summarize(total_activity = sum(min1:min1440)) %>%
+  ggplot(aes(x = age, y = total_activity, color = sex)) +
+  geom_point(alpha = 1) +
+  facet_grid(~education) +
+  geom_smooth(se = FALSE) +
+  scale_color_brewer(palette = 'Paired')
+```
 
 
 
