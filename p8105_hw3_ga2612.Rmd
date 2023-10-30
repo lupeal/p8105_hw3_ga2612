@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(p8105.datasets)
 library(forcats)
+library(RColorBrewer)
 ```
 
 # Problem 1
@@ -135,10 +136,6 @@ nhanes_demo <- read_csv('data_hw3/nhanes_covar.csv')
 nhanes_accel <- read_csv('data_hw3/nhanes_accel.csv')
 ```
 
-Load, tidy, merge, and otherwise organize the data sets. Your final dataset should include all originally observed variables; 
-
-exclude participants less than 21 years of age, and those with missing demographic data; and encode data with reasonable variable classes (i.e. not numeric, and using factors with the ordering of tables and plots in mind).
-
 ```{r}
 #cleaning data
 #note: sex (1 = male, 2 = female), edu (1 = less than high school, 2 = high school equiv, 3 = more than high)
@@ -169,25 +166,45 @@ nhanes_tidy <- nhanes_tidy %>%
     sex = as.factor(sex),
     age = as.double(age),
     bmi = as.double(bmi),
-    education = as.factor(education))
+    education = as.factor(education)) %>%
+  mutate(
+    education = case_when(
+      education == '1' ~ 'less than high school',
+      education == '2' ~ 'high school equivalent',
+      education == '3' ~ 'more than high school'),
+      
+    sex = case_when(
+      sex == '1' ~ 'male',
+      sex == '2' ~ 'female'))
 ```
 
+and create a visualization of the age distributions for men and women in each education category. Comment on these items.
+
+Below is a table for the number of men and women in each education category. We can see that when participants had less than high school and more than high school education, there were more females than males in both types of education. 
+
+```{r}
+#table for sex & education count
+nhanes_tidy %>%
+  group_by(education, sex) %>%
+  count(sex) %>%
+  pivot_wider(names_from = education,
+              values_from = n) %>%
+  knitr::kable()
+```
+
+
+Below is a visualization of the age distributions for men and women in each education category. We can see that when participants had more than high school education, they tend to be younger than the participants with less than or a high school equivalent education. 
 
 ```{r}
 nhanes_tidy %>%
-  head()
+  ggplot(aes(x = age, fill = sex)) +
+  geom_density(alpha = 0.5) +
+  facet_grid(~education) +
+  viridis::scale_fill_viridis(discrete = TRUE)
 
-# sex must be fctr
-# edu must be fctr
-# age must be dbl?
-# bmi must be dbl?
+#another option for color
+# scale_fill_brewer(palette = 'PuRd') 
 ```
-
-
-
-
-
-`
 
 
 
