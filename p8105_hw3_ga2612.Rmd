@@ -135,28 +135,59 @@ nhanes_demo <- read_csv('data_hw3/nhanes_covar.csv')
 nhanes_accel <- read_csv('data_hw3/nhanes_accel.csv')
 ```
 
-note: sex (1 = male, 2 = female), edu (1 = less than high school, 2 = high school equiv, 3 = more than high)
+Load, tidy, merge, and otherwise organize the data sets. Your final dataset should include all originally observed variables; 
+
+exclude participants less than 21 years of age, and those with missing demographic data; and encode data with reasonable variable classes (i.e. not numeric, and using factors with the ordering of tables and plots in mind).
 
 ```{r}
 #cleaning data
+#note: sex (1 = male, 2 = female), edu (1 = less than high school, 2 = high school equiv, 3 = more than high)
 nhanes_demo <- nhanes_demo[-c(1, 2, 3, 4),] %>%
   rename(seqn = '...1',
          sex = '1 = male',
          age = '...3',
          bmi = '...4',
-         education = '1 = Less than high school')
+         education = '1 = Less than high school') %>%
+  mutate(seqn = as.double(seqn))
 
 nhanes_accel <- janitor::clean_names(nhanes_accel)
 ```
 
 ```{r}
+#merging datasets
+nhanes_tidy <- left_join(nhanes_demo, nhanes_accel,
+                         by = 'seqn')
 
+#cleaning merged data
+nhanes_tidy <- nhanes_tidy %>%
+  filter(!(age < 21),
+         !(is.na(sex)),
+         !(is.na(age)),
+         !(is.na(bmi)),
+         !(is.na(education))) %>%
+  mutate(
+    sex = as.factor(sex),
+    age = as.double(age),
+    bmi = as.double(bmi),
+    education = as.factor(education))
+```
+
+
+```{r}
+nhanes_tidy %>%
+  head()
+
+# sex must be fctr
+# edu must be fctr
+# age must be dbl?
+# bmi must be dbl?
 ```
 
 
 
 
 
+`
 
 
 
