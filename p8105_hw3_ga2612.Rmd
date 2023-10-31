@@ -100,51 +100,35 @@ brfss_smart2010 <- janitor::clean_names(brfss_smart2010) %>%
 ```
 
 
-In 2002, which states were observed at 7 or more locations? What about in 2010?
-
-
 Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state (that is, make a plot showing a line for each state across years – the geom_line geometry and group aesthetic will help).
 
 
 Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.
 
 
-```{r}
-brfss_smart2010 %>%
-  filter(year == '2002') %>%
-  group_by(location_abrv, location_desc) %>%
-  mutate(rank = min_rank(desc(n)))
-```
-
+The table below shows the different states that were observed at 7 or more locations in 2002. We can see that Connecticut, Florida, Massachusetts, North Carolina, New Jersey, and Pennsylvania; a total of 6 states were observed at 7 or more locations in 2002. 
 
 ```{r}
+#table for states in 2002
 brfss_smart2010 %>%
   filter(year == '2002') %>%
-  group_by(location_abrv) %>%
-  count()
-```
-
-```{r}
-brfss_smart2010 %>%
-  filter(year == '2002') %>%
-  group_by(location_abrv, location_desc) %>%
-  count()
-```
-
-```{r}
-brfss_smart2010 %>%
-  filter(year == '2002') %>%
-  group_by(location_abrv, location_desc) %>%
-  count() %>%
-  filter(location_abrv > 35)
-```
-
-```{r}
-brfss_smart2010 %>%
-  filter(year == '2002') %>%
-  group_by(location_abrv) %>%
+  group_by(states) %>%
   summarize(n = n()) %>%
-  filter(n >= 35)
+  filter(n >= 35) %>%
+  knitr::kable()
+```
+
+
+The table below shoes the different states that were observed at 7 or more location in 2010. We can see that 10 states were observed at 7 or more locations in 2010; including California, Colorado, Florida, Massachusetts, Maryland, North Carolina, Nebraska, New Jersey, New York, Ohio. Overtime, more states were observed at more locations. 
+
+```{r}
+#table for states in 2010
+brfss_smart2010 %>%
+  filter(year == '2010') %>%
+  group_by(states) %>%
+  summarize(n = n()) %>%
+  filter(n >= 35) %>%
+  knitr::kable()
 ```
 
 
