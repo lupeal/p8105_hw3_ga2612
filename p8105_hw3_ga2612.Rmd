@@ -242,7 +242,64 @@ nhanes_tidy %>%
 ```
 
 
+Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences.
 
 
+note: there are 1440 mins in 24 hrs and 1440 columns for minutes
 
+
+```{r}
+#xtra ideas
+nhanes_tidy %>%
+  group_by(seqn, sex, age, bmi, education) %>%
+  pivot_longer(min1:min1440,
+               names_to = 'minute',
+               values_to = 'activity') %>%
+  mutate(hour1 = case_when(
+    min1:min60 ~ 
+  ))
+```
+
+```{r}
+nhanes_tidy %>%
+  group_by(seqn, sex, age, bmi, education) %>%
+  mutate(hour1 = sum(min1:min60),
+         hour2 = sum(min60:min120),
+         hour3 = sum(min120:min180),
+         hour4 = sum(min180:min240),
+         hour5 = sum(min240:min300),
+         hour6 = sum(min300:min360),
+         hour7 = sum(min360:min420),
+         hour8 = sum(min420:min480),
+         hour9 = sum(min480:min540),
+         hour10 = sum(min540:min600),
+         hour11 = sum(min600:min660),
+         hour12 = sum(min660:min720),
+         hour13 = sum(min720:min780),
+         hour14 = sum(min780:min840),
+         hour15 = sum(min840:min900),
+         hour16 = sum(min900:min960),
+         hour17 = sum(min960:min1020),
+         hour18 = sum(min1020:min1080),
+         hour19 = sum(min1080:min1140),
+         hour20 = sum(min1140:min1200),
+         hour21 = sum(min1200:min1260),
+         hour22 = sum(min1260:min1320),
+         hour23 = sum(min1320:min1380),
+         hour24 = sum(min1380:min1440)) %>%
+  select(seqn, sex, age, bmi, education, hour1:hour24) %>%
+  pivot_longer(hour1:hour24,
+               names_to = 'hour',
+               values_to = 'activity') %>%
+  ggplot(aes(x = fct_inorder(hour), y = activity, color = sex)) +
+  geom_point() +
+  facet_grid(~education) +
+  geom_smooth(se = FALSE) +
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust = 1)) +
+  scale_color_brewer(palette = 'Paired') +
+  xlab('Hour')
+```
+
+The plot above shows the 24-hour activity time courses for each education level and sex. If we consider hour 1 to be 12am, for those with high school equivalent eduation we can see that there are higher activity levels around hours 7-9 which can be attributed to early morning exercises or commutes. This is also similar in the other two levels of education, but there is more activity in general/throughout the day for those with a more than high school education. 
 
