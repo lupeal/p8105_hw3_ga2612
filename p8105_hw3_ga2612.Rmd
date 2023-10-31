@@ -147,7 +147,11 @@ nhanes_demo <- nhanes_demo[-c(1, 2, 3, 4),] %>%
          education = '1 = Less than high school') %>%
   mutate(seqn = as.double(seqn))
 
-nhanes_accel <- janitor::clean_names(nhanes_accel)
+nhanes_accel <- janitor::clean_names(nhanes_accel) %>%
+  pivot_longer(min1:min1440,
+               names_to = 'minute',
+               values_to = 'mims') %>%
+  mutate(minute = as.numeric(str_sub(minute, 4, -1)))
 ```
 
 ```{r}
@@ -175,7 +179,10 @@ nhanes_tidy <- nhanes_tidy %>%
       
     sex = case_when(
       sex == '1' ~ 'male',
-      sex == '2' ~ 'female'))
+      sex == '2' ~ 'female')) %>%
+  mutate(education = factor(education, levels = c('less than high school',
+                                                  'high school equivalent',
+                                                  'more than high school')))
 ```
 
 and create a visualization of the age distributions for men and women in each education category. Comment on these items.
@@ -184,12 +191,14 @@ Below is a table for the number of men and women in each education category. We 
 
 ```{r}
 #table for sex & education count
-nhanes_tidy %>%
-  group_by(education, sex) %>%
+nhanes_demo %>%
+  group_by(education, sex, seqn) %>%
   count(sex) %>%
   pivot_wider(names_from = education,
               values_from = n) %>%
   knitr::kable()
+
+#change mutate edu to demo
 ```
 
 
@@ -225,6 +234,13 @@ nhanes_tidy %>%
   select(seqn, sex, age, bmi, education, total_activity)
 ```
 
+```{r}
+nhanes_tidy %>%
+  pivot_longer(min1:min1440,
+               names_to = 'minute',
+               values_to = 'mims')
+```
+
 
 
 Below are plots for total activities across age for men and women in different education levels. From the plots we can see that for those with high school equivalent education total activity tended to decline for both male and females as age increased. For those with more than high school education, total activity tended to be higher for younger males than older males; for females there was higher total activity for middle-aged women. 
@@ -233,7 +249,7 @@ Below are plots for total activities across age for men and women in different e
 #finally? might work, but feeling iffy on total activity observations. 
 nhanes_tidy %>%
   group_by(seqn, sex, age, bmi, education) %>%
-  summarize(total_activity = sum(min1:min1440)) %>%
+  summarize(total_activity = sum(mims)) %>%
   ggplot(aes(x = age, y = total_activity, color = sex)) +
   geom_point(alpha = 1) +
   facet_grid(~education) +
@@ -300,6 +316,20 @@ nhanes_tidy %>%
   scale_color_brewer(palette = 'Paired') +
   xlab('Hour')
 ```
+
+```{r}
+nhanes_tidy %>%
+  ggplot(aes(x = minute, y = mims, color = sex)) + 
+  geom_point(alpha = .05, size = 0.5) +
+  facet_grid(~education) +
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+nhanes_tidy %>% head()
+```
+
+
 
 The plot above shows the 24-hour activity time courses for each education level and sex. If we consider hour 1 to be 12am, for those with high school equivalent eduation we can see that there are higher activity levels around hours 7-9 which can be attributed to early morning exercises or commutes. This is also similar in the other two levels of education, but there is more activity in general/throughout the day for those with a more than high school education. 
 
